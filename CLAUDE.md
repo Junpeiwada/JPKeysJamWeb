@@ -2,7 +2,7 @@
 
 ## このリポジトリ
 
-iOS アプリ JPKeysJam（`../JPKeysJam`、private）の「弾くまで待つ」ガイドを、Android Chrome 向けの Web にしたもの。GitHub Pages で公開する（base は `/JPKeysJamWeb/`）。
+iOS アプリ JPKeysJam（`../JPKeysJam`、private）の「弾くまで待つ」ガイドを、Android Chrome 向けの Web にしたもの。GitHub Pages で公開する（base は `/JPKeysJamWeb/`。https://junpeiwada.github.io/JPKeysJamWeb/ 。main への push で `.github/workflows/pages.yml` が公開する）。
 
 ## 先に読むもの
 

@@ -4,6 +4,7 @@
 
 | 日付 | 変更者 | 変更内容 |
 | --- | --- | --- |
+| 2026-11-12 | Claude | GitHub（public）に公開し、Pages の完了確認（200・133 曲）が通った。 |
 | 2026-11-12 | Claude | フェーズ1〜4 と P5-1 を実装し、レビュー 6 回の指摘を直して typecheck・テスト 365 件・ビルドが通った。 |
 | 2026-11-12 | Claude | P1-2 に手直し表の rights=pd と曲数の照合を足した（波 1 のレビューで SongsDev も全曲 free と分かったため）。 |
 | 2026-11-12 | Claude | P1-7 の smfPlayer は先読みをやめ SMFPlayer.swift の移植にした（GuideSession が同じ API を使うため）。 |
@@ -27,7 +28,7 @@ JPKeysJam 側は読むだけ。曲は `Resources/Songs`（公開分）だけを�
 
 ## 進捗
 
-**現在**: フェーズ5（次の一手: P5-2 GitHub に public リポジトリを作り公開する。ユーザーの確認待ち）
+**現在**: 全フェーズ完了（残りは各フェーズの目視の確認）
 
 | フェーズ | 状態 | 完了 | 備考 |
 | --- | --- | --- | --- |
@@ -35,7 +36,7 @@ JPKeysJam 側は読むだけ。曲は `Resources/Songs`（公開分）だけを�
 | 2. 弾くまで待つガイドの判定 | ✅ 完了 | 5/5 | — |
 | 3. 演奏画面と MIDI 鍵盤 | ✅ 完了 | 5/5 | 目視の確認は残る |
 | 4. 履歴・設定・PWA | ✅ 完了 | 5/5 | 目視の確認は残る |
-| 5. GitHub Pages で公開 | 🔄 進行中 | 1/3 | P5-2 は公開前にユーザーの確認が要る |
+| 5. GitHub Pages で公開 | ✅ 完了 | 3/3 | Android 実機の目視は残る |
 
 > 状態: ⬜ 未着手 / 🔄 進行中 / ✅ 完了 / ⏸️ 保留。タスクは `- [ ]` / `- [x]`。
 > フェーズ内の全タスクが `- [x]` になったら ✅ にする。備考は1行まで（詳細は各フェーズ本文へ）。
@@ -164,8 +165,8 @@ npm run typecheck && npm test && npm run build && ls dist/sw.js dist/manifest.we
 ### タスク
 
 - [x] **P5-1**: `.github/workflows/pages.yml` を作る（main への push で `npm ci`・`npm test`・`npm run build` を流し、`actions/deploy-pages` で `dist/` を公開する）。`README.md`（何か・対応ブラウザ（Android／PC の Chrome・Edge。Firefox は不可）・USB OTG でつなぐこと・ライセンス）を書く（触る: `.github/workflows/pages.yml`, `README.md`／依存: P4-4）
-- [ ] **P5-2**: GitHub に public リポジトリ `Junpeiwada/JPKeysJamWeb` を作り、main を push し、Pages の公開元を GitHub Actions にする。**外への公開なので、実行の直前にユーザーへ確認する**（触る: なし（GitHub 側の設定）／依存: P5-1）
-- [ ] **P5-3**: 公開後の確認で分かったことを `README.md`・`CLAUDE.md` に反映し、JPKeysJam の `MEMORY.md` の「参照」に Web 版の URL を 1 項目足す（触る: `README.md`, `CLAUDE.md`, `../JPKeysJam/MEMORY.md`／依存: P5-2）
+- [x] **P5-2**: GitHub に public リポジトリ `Junpeiwada/JPKeysJamWeb` を作り、main を push し、Pages の公開元を GitHub Actions にする。**外への公開なので、実行の直前にユーザーへ確認する**（触る: なし（GitHub 側の設定）／依存: P5-1）
+- [x] **P5-3**: 公開後の確認で分かったことを `README.md`・`CLAUDE.md` に反映し、JPKeysJam の `MEMORY.md` の「参照」に Web 版の URL を 1 項目足す（触る: `README.md`, `CLAUDE.md`, `../JPKeysJam/MEMORY.md`／依存: P5-2）
 
 ### 完了確認
 
