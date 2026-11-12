@@ -39,6 +39,8 @@ export default defineConfig({
         icons: [
           { src: 'icons/icon-192.png', sizes: '192x192', type: 'image/png' },
           { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png' },
+          // 背景の絵が端まであり、JP マークは中央の約 53% に収まるので、Android の丸い切り抜き（中央 80%）でも欠けない
+          { src: 'icons/icon-512.png', sizes: '512x512', type: 'image/png', purpose: 'maskable' },
         ],
       },
       workbox: {
