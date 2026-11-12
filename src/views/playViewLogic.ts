@@ -181,3 +181,60 @@ export function snapshotsEqual(a: GuideSnapshot | null, b: GuideSnapshot | null)
     sameSet(a.wrongHeldRight, b.wrongHeldRight)
   )
 }
+
+/** 自動演奏中に光らせる鍵。伴奏の位置で鳴っている音を、手ごとの区域の鍵に振り替える（音名は全部対象） */
+export function guideNotesForSounding(
+  sounding: { right: readonly number[]; left: readonly number[] },
+  snapshotHands: PlayHands,
+  range: KeyRange,
+): Set<number> {
+  const all = new Set([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11])
+  const splitsByNote = snapshotHands === 'both'
+  const right = guideNotes(sounding.right, all, range, 'right', splitsByNote)
+  const left = guideNotes(sounding.left, all, range, 'left', splitsByNote)
+  return new Set([...right, ...left])
+}
+
+/** 演奏画面の鍵盤の高さ（手本: KeyboardSizing.height。鍵盤の高さの段階は標準だけ） */
+export const KEYBOARD_SIZING = {
+  /** 横向きの高さの上限（画面の高さに対する割合） */
+  landscapeHeightRatio: 0.36,
+  /** 横向きの白鍵の縦横比の上限 */
+  landscapeAspect: 4.0,
+  /** 横向きの下限（px） */
+  landscapeMinimum: 108,
+  /** 縦向きの高さの上限（画面の高さに対する割合） */
+  portraitHeightRatio: 0.33,
+  /** 縦向きの高さ（画面の幅に対する割合） */
+  portraitWidthRatio: 0.56,
+} as const
+
+export function keyboardHeight(
+  viewWidth: number,
+  viewHeight: number,
+  landscape: boolean,
+  keyboardWidth: number,
+  whiteKeyCount: number,
+): number {
+  if (landscape) {
+    const whiteWidth = keyboardWidth / Math.max(whiteKeyCount, 1)
+    const base = Math.min(whiteWidth * KEYBOARD_SIZING.landscapeAspect, viewHeight * KEYBOARD_SIZING.landscapeHeightRatio)
+    return Math.max(base, KEYBOARD_SIZING.landscapeMinimum)
+  }
+  return Math.min(viewWidth * KEYBOARD_SIZING.portraitWidthRatio, viewHeight * KEYBOARD_SIZING.portraitHeightRatio)
+}
+
+/** バーの左端からの割合（0〜1）で移る先のステップ。弾き終えた扱いにしないよう、最後のステップまで（手本: PlayView.step(atFraction:)） */
+export function stepAtFraction(fraction: number, count: number): number {
+  if (count <= 0 || !Number.isFinite(fraction)) return 0
+  return Math.min(Math.max(Math.floor(fraction * count), 0), count - 1)
+}
+
+/**
+ * 鍵盤の下のすき間に出すロゴのグリフの高さ。小さすぎる（12 未満）ときは null（出さない）。
+ * room はすき間の高さ（下のセーフエリアを含む）。手本: PlayView の BrandLogo の glyphHeight
+ */
+export function logoGlyphHeight(room: number, viewWidth: number): number | null {
+  const glyph = Math.min((room - 6) * 1.5, (viewWidth - 40) / 8, 64) / 2
+  return glyph >= 12 ? glyph : null
+}

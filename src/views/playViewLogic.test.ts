@@ -3,6 +3,10 @@ import { KEYS13, KEYS25 } from '../guide/keyRange'
 import type { GuideSnapshot } from '../guide/guideSession'
 import {
   displayedHands,
+  guideNotesForSounding,
+  keyboardHeight,
+  logoGlyphHeight,
+  stepAtFraction,
   guideNotes,
   guideNotesForStep,
   handIsSelectable,
@@ -178,5 +182,41 @@ describe('snapshotsEqual', () => {
     expect(snapshotsEqual(base, { ...base, wrongHeldNotes: new Set([61]) })).toBe(false)
     expect(snapshotsEqual(base, { ...base, elapsed: 4.0 })).toBe(false)
     expect(snapshotsEqual(base, null)).toBe(false)
+  })
+})
+
+describe('iOS の演奏画面の寸法', () => {
+  it('横向きの鍵盤の高さは白鍵の縦横比 4 と画面の高さの 36% の小さい方で、108 を下回らない', () => {
+    // iPhone 横（852×393、余白 16 ずつ）・25 鍵（白鍵 15）
+    expect(keyboardHeight(852, 393, true, 820, 15)).toBeCloseTo(393 * 0.36)
+    // 幅が狭いと白鍵の縦横比で決まる
+    expect(keyboardHeight(600, 800, true, 300, 15)).toBe(108)
+    expect(keyboardHeight(2000, 900, true, 600, 15)).toBeCloseTo(160)
+  })
+
+  it('縦向きの鍵盤の高さは画面の幅の 56% と高さの 33% の小さい方', () => {
+    expect(keyboardHeight(393, 852, false, 361, 8)).toBeCloseTo(393 * 0.56)
+    expect(keyboardHeight(800, 900, false, 768, 8)).toBeCloseTo(900 * 0.33)
+  })
+
+  it('バーの割合から最後のステップまでのステップを返す', () => {
+    expect(stepAtFraction(0, 10)).toBe(0)
+    expect(stepAtFraction(0.55, 10)).toBe(5)
+    expect(stepAtFraction(1, 10)).toBe(9)
+    expect(stepAtFraction(-1, 10)).toBe(0)
+    expect(stepAtFraction(0.5, 0)).toBe(0)
+    expect(stepAtFraction(Number.NaN, 10)).toBe(0)
+  })
+
+  it('ロゴはすき間が足りないときは出さない', () => {
+    expect(logoGlyphHeight(20, 852)).toBeNull()
+    expect(logoGlyphHeight(41, 852)).toBeCloseTo(26.25)
+    expect(logoGlyphHeight(200, 852)).toBe(32)
+  })
+
+  it('自動演奏中は鳴っている音を手の区域の鍵に振り替える', () => {
+    const range = { lowest: 48, highest: 72 }
+    // 右手 64 はそのまま、85（C#6）は右手の区域（60〜72）の C# の 61、左手 36（C2）は左手の区域（48〜59）の 48
+    expect([...guideNotesForSounding({ right: [64, 85], left: [36] }, 'both', range)].sort((a, b) => a - b)).toEqual([48, 61, 64])
   })
 })

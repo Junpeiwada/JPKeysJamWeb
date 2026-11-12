@@ -1,14 +1,15 @@
 // 演奏画面（手本: App/Views/PlayView.swift）。
-// 上の帯 1 行（戻る・曲名・最初から・手・鍵盤数・MIDI バッジ・設定）、進み具合、ロール、鍵盤。
+// 横: 上の帯（左に戻る・鍵盤数・手、真ん中に最初から・自動演奏、右に MIDI の点・設定）、進み具合、ロール（左上に曲名）、鍵盤、下にロゴ。
+// 縦: 帯（戻る・再生の操作・点・設定）、進み具合、鍵盤数・手、ロール、鍵盤。音色（サウンド）は Web 版に無い。
 // 入力（Web MIDI・画面の鍵盤）は GuideController.handleInput へ渡し、判定と音は controller が決める。
-import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type ReactElement } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState, useSyncExternalStore, type PointerEvent as ReactPointerEvent, type ReactElement, type ReactNode } from 'react'
 import { GuideController } from '../audio/accompaniment'
 import { audioEngine } from '../audio/engine'
 import { GuideScore } from '../guide/guideScore'
 import type { GuideSnapshot } from '../guide/guideSession'
 import { PLAY_HANDS } from '../guide/hand'
 import type { PlayHands } from '../guide/hand'
-import { resolve as resolveKeyRange } from '../guide/keyRange'
+import { resolve as resolveKeyRange, whiteKeyCount } from '../guide/keyRange'
 import type { KeyRange } from '../guide/keyRange'
 import { localizedText } from '../library/catalog'
 import type { SongEntry } from '../library/catalog'
@@ -19,11 +20,12 @@ import type { MidiMessage } from '../midi/types'
 import type { WebMidiInput } from '../midi/webMidi'
 import { FinishCard } from './FinishCard'
 import { GuideRoll } from './GuideRoll'
-import { Keyboard } from './Keyboard'
+import { KEYBOARD_OUTSET, Keyboard } from './Keyboard'
+import { BackwardEndFill, BrandLogo, ChevronDown, Gearshape, PauseFill, PlayFill } from './icons'
 import {
   KEY_LAYOUT_OPTIONS,
-  LOWEST_RIGHT_NOTE,
   displayedHands,
+  guideNotesForSounding,
   guideNotesForStep,
   handIsSelectable,
   handsName,
@@ -31,11 +33,14 @@ import {
   keyLayoutLabel,
   keyLayoutOf,
   keyboardAllowsBothHands,
+  keyboardHeight,
+  logoGlyphHeight,
   progressFraction,
   progressText,
   rollHands,
   shouldReportStart,
   snapshotsEqual,
+  stepAtFraction,
 } from './playViewLogic'
 import './PlayView.css'
 
@@ -86,15 +91,32 @@ function useSmf(song: SongEntry, arrangementID: string): Loaded {
   return loaded
 }
 
-/** 画面の幅と高さから横画面かを決める */
-function useLandscape(): boolean {
-  const [landscape, setLandscape] = useState(() => isLandscape(window.innerWidth, window.innerHeight))
+/** 画面の左右の余白（手本: PlayView.margin） */
+const MARGIN = 16
+/** 鍵盤の下に空けるすき間（手本: AppSettings の鍵盤の位置の既定。横 12・縦 30） */
+const KEYBOARD_LIFT = { landscape: 12, portrait: 30 } as const
+/**
+ * 下のセーフエリアの代わりに空ける高さ。iOS はホームバーの分（横 21pt）を空け、そこにロゴを出す。
+ * Android のジェスチャーの帯の近くを触って誤作動しないよう、Web でも同じだけ空ける
+ */
+const BOTTOM_INSET = 21
+
+/**
+ * 演奏画面の大きさ（セーフエリアの内側）。向きと鍵盤の高さを決める。
+ * 測る要素は曲を読み込んだあとに出てくるので、callback ref で要素が付いた時点から見張る
+ */
+function useViewSize(): [(el: HTMLDivElement | null) => void, { width: number; height: number }] {
+  const [element, setElement] = useState<HTMLDivElement | null>(null)
+  const [size, setSize] = useState({ width: window.innerWidth, height: window.innerHeight })
   useEffect(() => {
-    const update = () => setLandscape(isLandscape(window.innerWidth, window.innerHeight))
-    window.addEventListener('resize', update)
-    return () => window.removeEventListener('resize', update)
-  }, [])
-  return landscape
+    if (!element) return
+    const measure = () => setSize({ width: element.clientWidth, height: element.clientHeight })
+    measure()
+    const observer = new ResizeObserver(measure)
+    observer.observe(element)
+    return () => observer.disconnect()
+  }, [element])
+  return [setElement, size]
 }
 
 /** 演奏中は画面をスリープさせない。裏から戻ったら取り直す。対応していなければ何もしない */
@@ -127,7 +149,7 @@ function useWakeLock(): void {
   }, [])
 }
 
-/** ボタンから出す吹き出し。ボタンの真下に出し、外を押すか Esc で閉じる */
+/** ボタン（チップ）から出す吹き出し。ボタンの真下に出し、外を押すか Esc で閉じる。選択肢は横に並べる（手本: keyLayoutPicker・handsPicker） */
 function Dropdown(props: { label: string; ariaLabel: string; children: (close: () => void) => ReactElement }): ReactElement {
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
@@ -150,13 +172,14 @@ function Dropdown(props: { label: string; ariaLabel: string; children: (close: (
     <div className="play-dropdown" ref={rootRef}>
       <button
         type="button"
-        className="play-btn"
+        className="play-chip"
         aria-label={props.ariaLabel}
         aria-haspopup="listbox"
         aria-expanded={open}
         onClick={() => setOpen((v) => !v)}
       >
         {props.label}
+        <ChevronDown size={10} />
       </button>
       {open && (
         <div className="play-popover" role="listbox" aria-label={props.ariaLabel}>
@@ -167,10 +190,32 @@ function Dropdown(props: { label: string; ariaLabel: string; children: (close: (
   )
 }
 
+/** 吹き出しの選択肢の 1 つ。選んでいるものは太字にし、文字の左にチェックを付ける（手本: dropdownOptionLabel） */
+function DropdownOption(props: { selected: boolean; disabled?: boolean; onSelect(): void; children: ReactNode }): ReactElement {
+  return (
+    <button
+      type="button"
+      role="option"
+      aria-selected={props.selected}
+      disabled={props.disabled}
+      className={`play-option ${props.selected ? 'selected' : ''}`}
+      onClick={props.onSelect}
+    >
+      {props.selected && (
+        <svg width="13" height="13" viewBox="0 0 16 16" aria-hidden="true" className="play-option-check">
+          <path d="M2.5 8.5 L6.5 12.5 L13.5 3.5" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      )}
+      {props.children}
+    </button>
+  )
+}
+
 export function PlayView(props: PlayViewProps): ReactElement {
   const { song, arrangementID, midi, settings, onBack, onOpenSettings, settingsOpen } = props
   const loaded = useSmf(song, arrangementID)
-  const landscape = useLandscape()
+  const [rootRef, viewSize] = useViewSize()
+  const landscape = isLandscape(viewSize.width, viewSize.height)
   useWakeLock()
 
   // 設定
@@ -370,122 +415,219 @@ export function PlayView(props: PlayViewProps): ReactElement {
 
   const score = controller && snapshot ? controller.guide.scoreFor(snapshot.hands) : null
   const step = score && snapshot ? score.steps[snapshot.stepIndex] : undefined
-  const guideNotes = snapshot ? guideNotesForStep(step, snapshot, range) : new Set<number>()
+  // 自動演奏中は次のステップではなく、伴奏の位置で鳴っている音を光らせる
+  const guideNotes = !snapshot
+    ? new Set<number>()
+    : snapshot.autoplay !== 'off' && score && controller
+      ? guideNotesForSounding(score.soundingNotes(controller.player.position), snapshot.hands, range)
+      : guideNotesForStep(step, snapshot, range)
   const shownHands = displayedHands(handsSetting, hasLeftPart, allowsBoth)
-  const splitNote = snapshot?.hands === 'both' ? LOWEST_RIGHT_NOTE : null
   const done = snapshot?.stepIndex ?? 0
   const total = snapshot?.stepCount ?? 0
   const connected = deviceNames.length > 0
+  const autoplaying = snapshot?.autoplay === 'playing'
+
+  // 鍵盤の高さとロゴ（手本: PlayView.content）
+  const lift = landscape ? KEYBOARD_LIFT.landscape : KEYBOARD_LIFT.portrait
+  // iOS は下のセーフエリア（ホームバー）を除いた高さで決める。Web はその代わりに空ける BOTTOM_INSET を除く
+  const kbHeight = keyboardHeight(
+    viewSize.width,
+    viewSize.height - BOTTOM_INSET,
+    landscape,
+    viewSize.width - MARGIN * 2,
+    whiteKeyCount(range),
+  )
+  const logoRoom = 8 + lift + BOTTOM_INSET
+  const glyphHeight = logoGlyphHeight(logoRoom, viewSize.width)
+
+  const restart = () => controller?.restart()
+  const toggleAutoplay = () => {
+    if (!controller || !snapshot) return
+    if (autoplaying) {
+      controller.guide.stopAutomatically()
+      return
+    }
+    // 弾き終えてカードが出ていたら、最初からやり直して流す
+    if (snapshot.isComplete) controller.restart()
+    controller.guide.playAutomatically()
+  }
+
+  // 進み具合のバー: タップかドラッグでそのステップへ移る（同じステップには移り直さない）
+  const seekFromBar = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (!controller || total <= 0) return
+    const box = event.currentTarget.getBoundingClientRect()
+    const target = stepAtFraction((event.clientX - box.left) / box.width, total)
+    if (target !== controller.guide.snapshot().stepIndex) controller.guide.seek(target)
+  }
+
+  const backButton = (
+    <button type="button" className="play-back" onClick={onBack} aria-label="曲に戻る">
+      ‹ 戻る
+    </button>
+  )
+  const keyLayoutButton = (
+    <Dropdown label={keyLayoutLabel(range)} ariaLabel="鍵盤数">
+      {(close) => (
+        <>
+          {KEY_LAYOUT_OPTIONS.map((o) => (
+            <DropdownOption
+              key={o.value}
+              selected={o.value === keyLayoutOf(range)}
+              onSelect={() => {
+                settings.keyRange = o.value
+                close()
+              }}
+            >
+              {o.label}
+            </DropdownOption>
+          ))}
+        </>
+      )}
+    </Dropdown>
+  )
+  const handsButton = hasLeftPart && (
+    <Dropdown label={handsName(shownHands)} ariaLabel="弾く手">
+      {(close) => (
+        <>
+          {PLAY_HANDS.map((h: PlayHands) => (
+            <DropdownOption
+              key={h}
+              selected={h === shownHands}
+              disabled={!handIsSelectable(h, allowsBoth)}
+              onSelect={() => {
+                settings.hands = h
+                close()
+              }}
+            >
+              {handsName(h)}
+            </DropdownOption>
+          ))}
+        </>
+      )}
+    </Dropdown>
+  )
+  const transport = (
+    <div className="play-transport">
+      <button type="button" className="play-icon" onClick={restart} aria-label="最初から">
+        <BackwardEndFill size={15} />
+      </button>
+      <button type="button" className="play-icon" onClick={toggleAutoplay} aria-label={autoplaying ? '一時停止' : '自動演奏'}>
+        {autoplaying ? <PauseFill size={15} /> : <PlayFill size={15} />}
+      </button>
+    </div>
+  )
+  const trailing = (
+    <div className="play-trailing">
+      <span className="play-badge" title={connected ? deviceNames.join(' / ') : 'MIDI 機器なし'}>
+        <span className={`play-badge-dot ${connected ? 'connected' : ''}`} />
+        {connected && <span className="play-badge-label">USB</span>}
+        {deviceNames.length > 1 && <span className="play-badge-more">+{deviceNames.length - 1}</span>}
+      </span>
+      {onOpenSettings && (
+        <button type="button" className="play-icon play-gear" onClick={onOpenSettings} aria-label="設定">
+          <Gearshape size={22} />
+        </button>
+      )}
+    </div>
+  )
 
   return (
-    <div className={`play-root ${landscape ? 'play-landscape' : 'play-portrait'}`}>
-      <header className="play-bar">
-        <button type="button" className="play-btn" onClick={onBack} aria-label="曲に戻る">
-          戻る
-        </button>
-        <h1 className="play-title">{title}</h1>
-        <div className="play-actions">
-          <button type="button" className="play-btn" onClick={() => controller?.restart()}>
-            最初から
-          </button>
-          {hasLeftPart && (
-            <Dropdown label={handsName(shownHands)} ariaLabel="弾く手">
-              {(close) => (
-                <>
-                  {PLAY_HANDS.map((h: PlayHands) => {
-                    const selectable = handIsSelectable(h, allowsBoth)
-                    return (
-                      <button
-                        key={h}
-                        type="button"
-                        role="option"
-                        aria-selected={h === shownHands}
-                        disabled={!selectable}
-                        className={`play-option ${h === shownHands ? 'selected' : ''}`}
-                        onClick={() => {
-                          settings.hands = h
-                          close()
-                        }}
-                      >
-                        {handsName(h)}
-                      </button>
-                    )
-                  })}
-                </>
-              )}
-            </Dropdown>
-          )}
-          <Dropdown label={keyLayoutLabel(range)} ariaLabel="鍵盤数">
-            {(close) => (
-              <>
-                {KEY_LAYOUT_OPTIONS.map((o) => (
-                  <button
-                    key={o.value}
-                    type="button"
-                    role="option"
-                    aria-selected={o.value === keyLayoutOf(range)}
-                    className={`play-option ${o.value === keyLayoutOf(range) ? 'selected' : ''}`}
-                    onClick={() => {
-                      settings.keyRange = o.value
-                      close()
-                    }}
-                  >
-                    {o.label}
-                  </button>
-                ))}
-              </>
-            )}
-          </Dropdown>
-          <span className={`play-badge ${connected ? 'connected' : ''}`} title={deviceNames.join(' / ')}>
-            {connected ? 'USB' : 'MIDI なし'}
-          </span>
-          {onOpenSettings && (
-            <button type="button" className="play-btn" onClick={onOpenSettings} aria-label="設定">
-              設定
-            </button>
-          )}
-        </div>
-      </header>
-
-      <div className="play-progress" role="progressbar" aria-label="進み具合" aria-valuemin={0} aria-valuemax={total} aria-valuenow={done}>
-        <div className="play-progress-track">
-          <div className="play-progress-fill" style={{ width: `${progressFraction(done, total) * 100}%` }} />
-        </div>
-        <span className="play-progress-text">{progressText(done, total)}</span>
-      </div>
-
-      <div className="play-roll">
-        {controller && snapshot && score && (
-          <GuideRoll
-            score={score}
-            snapshot={snapshot}
-            position={() => controller.player.position}
-            lowest={range.lowest}
-            highest={range.highest}
-            hands={rollHands(snapshot.hands)}
-          />
+    <div ref={rootRef} className={`play-root ${landscape ? 'play-landscape' : 'play-portrait'}`}>
+      <div
+        className="play-content"
+        style={{ padding: `8px ${MARGIN}px calc(${8 + lift}px + max(env(safe-area-inset-bottom), ${BOTTOM_INSET}px))` }}
+      >
+        {landscape ? (
+          <header className="play-bar">
+            <div className="play-leading">
+              {backButton}
+              {keyLayoutButton}
+              {handsButton}
+            </div>
+            {transport}
+            {trailing}
+          </header>
+        ) : (
+          <header className="play-bar">
+            <div className="play-leading">{backButton}</div>
+            {transport}
+            {trailing}
+          </header>
         )}
+
+        <div className="play-progress">
+          <div
+            className="play-progress-hit"
+            role="progressbar"
+            aria-label="進み具合"
+            aria-valuemin={0}
+            aria-valuemax={total}
+            aria-valuenow={done}
+            onPointerDown={(e) => {
+              e.currentTarget.setPointerCapture(e.pointerId)
+              seekFromBar(e)
+            }}
+            onPointerMove={(e) => {
+              if (e.currentTarget.hasPointerCapture(e.pointerId)) seekFromBar(e)
+            }}
+          >
+            <div className="play-progress-track">
+              <div className="play-progress-fill" style={{ width: `${progressFraction(done, total) * 100}%` }} />
+            </div>
+          </div>
+          <span className="play-progress-text">{progressText(done, total)}</span>
+        </div>
+
+        {!landscape && (
+          <div className="play-controls">
+            {keyLayoutButton}
+            {handsButton}
+          </div>
+        )}
+
+        {/* ロールと鍵盤は隙間なく重ねる。判定線が鍵盤の上端に接する */}
+        <div className="play-surface">
+          <div className="play-roll">
+            {controller && snapshot && score && (
+              <GuideRoll
+                score={score}
+                snapshot={snapshot}
+                position={() => controller.player.position}
+                lowest={range.lowest}
+                highest={range.highest}
+                hands={rollHands(snapshot.hands)}
+              />
+            )}
+            <span className="play-roll-title">{title}</span>
+          </div>
+          {/* 鍵盤の外枠の余白を左右へはみ出させ、鍵の端をロールの端にそろえる */}
+          <div className="play-keyboard" style={{ height: kbHeight, margin: `0 ${-KEYBOARD_OUTSET}px` }}>
+            <Keyboard
+              lowest={range.lowest}
+              highest={range.highest}
+              pressed={pressed}
+              guideNotes={guideNotes}
+              wrongNotes={snapshot?.wrongHeldNotes ?? new Set<number>()}
+              onNoteOn={(n) => screenInput('noteOn', n)}
+              onNoteOff={(n) => screenInput('noteOff', n)}
+            />
+          </div>
+        </div>
       </div>
 
-      <div className="play-keyboard">
-        <Keyboard
-          lowest={range.lowest}
-          highest={range.highest}
-          pressed={pressed}
-          guideNotes={guideNotes}
-          wrongNotes={snapshot?.wrongHeldNotes ?? new Set<number>()}
-          splitNote={splitNote}
-          onNoteOn={(n) => screenInput('noteOn', n)}
-          onNoteOff={(n) => screenInput('noteOff', n)}
-        />
-      </div>
+      {/* 鍵盤の下のすき間に薄くロゴを出す。小さすぎるときは出さない */}
+      {glyphHeight !== null && (
+        <div className="play-logo" style={{ height: logoRoom }}>
+          <BrandLogo glyphHeight={glyphHeight} />
+        </div>
+      )}
 
       {snapshot?.isComplete && (
         <FinishCard
           songTitle={title}
           elapsed={snapshot.elapsed}
           wrongCount={snapshot.wrongCount}
-          onRetry={() => controller?.restart()}
+          onRetry={restart}
           onBackToList={onBack}
         />
       )}

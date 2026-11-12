@@ -84,3 +84,64 @@ function kebab(name: string): string {
 export const cssVariables: Readonly<Record<string, string>> = Object.fromEntries(
   Object.entries(tone).map(([name, value]) => [`--${kebab(name)}`, toCssColor(value)]),
 )
+
+/**
+ * ベベルとフィレット（形の値）。JPKeyboardUI の Theme.swift の Bevel と同じ値。
+ * 部品の大きさに対する割合で決め、上限・下限で止める（どの大きさでも同じ見え方にする）
+ */
+export const bevel = {
+  /** 角丸の半径（短辺に対する割合） */
+  filletRatio: 0.12,
+  filletMin: 2,
+  filletMax: 8,
+  /** 手前の縁の厚み（高さに対する割合） */
+  lipRatio: 0.05,
+  lipMin: 2,
+  lipMax: 7,
+  /** 左右と奥の縁の厚み（手前の縁に対する割合） */
+  rimRatio: 0.35,
+  /** 上面の照り返しの濃さ（白の不透明度） */
+  highlight: 0.2,
+  /** 上面の奥側を明るくする量（白を混ぜる割合） */
+  sheen: 0.12,
+  /** 白鍵の上面と手前の縁の境目の線（黒の不透明度） */
+  crease: 0.2,
+  /** 境目の線の下端の太さ */
+  creaseWidth: 4,
+  /** 境目の線のすぐ上のハイライト（白の不透明度と太さ） */
+  shine: 1.0,
+  shineWidth: 2,
+  /** 黒鍵の手前の縁を白鍵の何倍にするか */
+  blackLipScale: 1.7,
+  /** 黒鍵の手前の斜面の明るい側の明るさ（上面の色に白を混ぜる割合） */
+  blackSlopeLight: 0.35,
+  /** 黒鍵の斜面の下に残す本体の縁の厚み */
+  blackSlopeGap: 3,
+  /** 押している鍵の手前の縁の厚み（ふつうの何倍にするか） */
+  pressedLipScale: 0.4,
+  /** 押している白鍵の奥の端に落とす影（黒の不透明度と、鍵の高さに対する長さ） */
+  pressedShade: 0.18,
+  pressedShadeRatio: 0.31,
+  /** 押している白鍵の左の端に落とす、左隣の鍵の影（黒の不透明度と幅） */
+  pressedSideShade: 0.2,
+  pressedSideShadeWidth: 16,
+  pressedSideShadeNear: 0.4,
+  pressedSideShadeFar: 0.12,
+  /** 落ち影の濃さ（黒の不透明度） */
+  shadow: 0.16,
+} as const
+
+/** 角丸の半径 */
+export function fillet(width: number, height: number): number {
+  return Math.min(Math.max(Math.min(width, height) * bevel.filletRatio, bevel.filletMin), bevel.filletMax)
+}
+
+/** 手前の縁の厚み */
+export function lip(height: number): number {
+  return Math.min(Math.max(height * bevel.lipRatio, bevel.lipMin), bevel.lipMax)
+}
+
+/** 左右と奥の縁の厚み */
+export function rim(height: number): number {
+  return Math.max(0.75, lip(height) * bevel.rimRatio)
+}

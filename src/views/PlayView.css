@@ -1,116 +1,216 @@
-/* 演奏画面。色は styles.css の変数だけを使う */
+/* 演奏画面（手本: App/Views/PlayView.swift）。色は styles.css の変数だけを使う */
 .play-root {
   position: relative;
-  display: flex;
-  flex-direction: column;
   width: 100%;
   height: 100dvh;
   box-sizing: border-box;
   background: var(--bg);
   color: var(--text);
   overflow: hidden;
-  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  /* 下のセーフエリアは .play-content の下の余白に含める（ロゴをそこに出すため） */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) 0 env(safe-area-inset-left);
 }
 
 .play-message {
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 12px;
+  gap: 16px;
+  font-size: 15px;
 }
 
-/* 上の帯 1 行 */
-.play-bar {
+/* 縦に 帯 → 進み具合 →（縦なら鍵盤数・手）→ ロールと鍵盤。間は 10（手本: VStack(spacing: 10)） */
+.play-content {
   display: flex;
-  align-items: center;
+  flex-direction: column;
   gap: 10px;
-  padding: 8px 12px;
+  height: 100%;
+  box-sizing: border-box;
+}
+
+button.play-back,
+button.play-chip,
+button.play-icon,
+button.play-option,
+button.play-btn {
+  font-family: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* 上の帯。左・真ん中・右の 3 つ。真ん中は帯の中央（手本: CenteredBarLayout） */
+.play-bar {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: center;
+  column-gap: 14px;
   flex: none;
 }
-.play-title {
-  flex: 1;
-  min-width: 0;
-  margin: 0;
-  font-size: 16px;
-  font-weight: 600;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-.play-actions {
+.play-leading {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 14px;
+  min-width: 0;
+}
+.play-trailing {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+}
+.play-transport {
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
-.play-btn {
+/* ‹ 戻る（ライムの文字） */
+.play-back {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 16px;
+  color: var(--accent-ink);
+  white-space: nowrap;
+}
+
+/* 鍵盤数・手のボタン（panel2 のカプセル） */
+.play-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 7px 14px;
+  border: none;
+  border-radius: 999px;
   background: var(--panel-2);
   color: var(--text);
-  border: 1px solid var(--line);
-  border-radius: 8px;
-  padding: 6px 12px;
-  font-size: 14px;
+  font-size: 13px;
+  line-height: 1.2;
   white-space: nowrap;
 }
 
-.play-badge {
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  padding: 4px 10px;
-  font-size: 12px;
+/* グリフだけのボタン（32 × 32） */
+.play-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: none;
+  color: var(--text);
+}
+.play-gear {
   color: var(--sub);
-  white-space: nowrap;
-}
-.play-badge.connected {
-  color: var(--usb);
-  border-color: var(--usb);
 }
 
-/* 吹き出し */
+/* MIDI 機器の点（つながっていなければ灰色、USB は緑） */
+.play-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.play-badge-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--sub);
+}
+.play-badge-dot.connected {
+  background: var(--usb);
+}
+.play-badge-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--usb);
+}
+.play-badge-more {
+  font-size: 10px;
+  color: var(--sub);
+}
+
+/* 読み込み中・失敗の画面の戻るボタン（ライムのカプセル） */
+.play-btn {
+  padding: 10px 20px;
+  border: none;
+  border-radius: 999px;
+  background: var(--accent);
+  color: var(--on-accent);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+/* 吹き出し（手本: JPKeyboardUI の dropdown。角丸 4・線・尻尾） */
 .play-dropdown {
   position: relative;
 }
 .play-popover {
   position: absolute;
-  top: calc(100% + 8px);
-  right: 0;
+  top: calc(100% + 10px);
+  left: 50%;
+  transform: translateX(-50%);
   z-index: 20;
-  min-width: 120px;
   display: flex;
-  flex-direction: column;
-  padding: 4px;
+  flex-direction: row;
+  padding: 0 4px;
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 4px;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--scrim) 40%, transparent);
+}
+/* 尻尾（ボタンを指す三角） */
+.play-popover::before {
+  content: '';
+  position: absolute;
+  top: -6px;
+  left: 50%;
+  width: 10px;
+  height: 10px;
+  background: var(--panel);
+  border-left: 1px solid var(--line);
+  border-top: 1px solid var(--line);
+  transform: translateX(-50%) rotate(45deg);
 }
 .play-option {
-  background: transparent;
-  color: var(--text);
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 11px 12px;
   border: none;
-  border-radius: 4px;
-  padding: 10px 14px;
-  font-size: 14px;
-  text-align: left;
+  background: none;
+  color: var(--text);
+  font-size: 15px;
+  white-space: nowrap;
 }
 .play-option.selected {
-  background: var(--accent);
-  color: var(--on-accent);
-  font-weight: 600;
+  font-weight: 700;
+}
+.play-option-check {
+  color: var(--accent-ink);
 }
 .play-option:disabled {
   color: var(--sub);
-  opacity: 0.5;
 }
 
-/* 進み具合 */
+/* 進み具合のバーと「n / m」。細いバーは触りにくいので、行の高さ 20 全体で受ける */
 .play-progress {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 4px 16px 8px;
   flex: none;
 }
-.play-progress-track {
+.play-progress-hit {
   flex: 1;
+  height: 20px;
+  display: flex;
+  align-items: center;
+  touch-action: none;
+}
+.play-progress-track {
+  position: relative;
+  width: 100%;
   height: 5px;
   border-radius: 999px;
   background: var(--line);
@@ -118,39 +218,68 @@
 }
 .play-progress-fill {
   height: 100%;
+  border-radius: 999px;
   background: var(--accent);
 }
 .play-progress-text {
-  font-size: 13px;
+  font-size: 12px;
   color: var(--sub);
   font-variant-numeric: tabular-nums;
 }
 
-/* ロールは残りの高さいっぱい、鍵盤は幅いっぱい */
+/* 縦: 鍵盤数・手（ロールの上） */
+.play-controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex: none;
+}
+
+/* ロールと鍵盤 */
+.play-surface {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
 .play-roll {
   position: relative;
   flex: 1;
   min-height: 0;
 }
+/* ロールの左上に重ねる曲名 */
+.play-roll-title {
+  position: absolute;
+  top: 0;
+  left: 0;
+  max-width: 60%;
+  padding: 6px 8px;
+  font-size: 13px;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  pointer-events: none;
+}
 .play-keyboard {
   flex: none;
-  width: 100%;
-}
-.play-landscape .play-keyboard {
-  height: 30%;
-}
-.play-portrait .play-keyboard {
-  height: 22%;
 }
 
-/* 縦画面: 帯は 2 段（曲名の下にボタンの列） */
-.play-portrait .play-bar {
-  flex-wrap: wrap;
+/* 鍵盤の下のすき間に薄く出すロゴ */
+.play-logo {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--sub);
+  opacity: 0.15;
+  pointer-events: none;
 }
-.play-portrait .play-title {
-  flex-basis: calc(100% - 80px);
-}
-.play-portrait .play-actions {
-  flex-basis: 100%;
-  flex-wrap: wrap;
+.brand-logo {
+  display: inline-flex;
+  align-items: center;
+  white-space: nowrap;
 }
