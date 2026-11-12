@@ -1,0 +1,108 @@
+.song-detail__scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  /* --scrim の不透明度を下げて背景を暗くする */
+  background: color-mix(in srgb, var(--scrim) 70%, transparent);
+}
+
+.song-detail {
+  position: relative;
+  box-sizing: border-box;
+  width: min(440px, 100%);
+  max-height: 100%;
+  overflow-y: auto;
+  padding: 24px 20px 20px;
+  border-radius: 16px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+}
+
+.song-detail__close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 50%;
+  background: var(--panel-2);
+  color: var(--text);
+  font-size: 20px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.song-detail__title {
+  margin: 0 40px 4px 0;
+  font-size: 22px;
+}
+
+.song-detail__composer {
+  margin: 0;
+  color: var(--sub);
+}
+
+.song-detail__heading {
+  margin: 20px 0 8px;
+  font-size: 13px;
+  color: var(--sub);
+}
+
+.song-detail__arrangements {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.song-detail__arrangement {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel-2);
+  color: var(--text);
+  cursor: pointer;
+}
+
+.song-detail__arrangement.is-selected {
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+.song-detail__arrangement-hands {
+  color: var(--sub);
+}
+
+.song-detail__actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.song-detail__preview,
+.song-detail__play {
+  flex: 1;
+  padding: 12px;
+  border-radius: 999px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.song-detail__preview {
+  border: 1px solid var(--line);
+  background: var(--panel-2);
+  color: var(--text);
+}
+
+.song-detail__play {
+  border: none;
+  background: var(--accent);
+  color: var(--on-accent);
+}

@@ -1,0 +1,53 @@
+/* 色の値は theme.ts と同じ（theme.test.ts でずれを検出する）。値を変えるときは両方を直す */
+:root {
+  --bg: #212427;
+  --panel: #282c2f;
+  --panel-2: #3a3e41;
+  --line: #4a4d51;
+  --text: #f3f5f5;
+  --sub: #9a9d9f;
+  --accent: #c8dd3c;
+  --accent-deep: #88962e;
+  --accent-ink: #c8dd3c;
+  --on-accent: #111315;
+  --scrim: #111315;
+  --cap-side: #1e2124;
+  --white-top: #f3f5f5;
+  --white-side: #afb1b2;
+  --gray-top: #1f2225;
+  --gray-side: #17191b;
+  --well: #1a1c1f;
+  --key-label: #949697;
+  --pressed-top: #aeb1b2;
+  --pressed-black-top: #2a2d2f;
+  --usb: #4cc46a;
+  --ble: #3fa9e0;
+  --black-accent: #3fa9e0;
+  --black-guide-top: #1f8fd6;
+  --black-guide-side-top: #1b6a9c;
+  --black-guide-side: #1d3948;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, sans-serif;
+  /* 演奏の邪魔にならないよう、タップのハイライト・選択・長押しメニューを抑える */
+  -webkit-tap-highlight-color: transparent;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  touch-action: manipulation;
+}

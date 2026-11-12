@@ -1,0 +1,144 @@
+.home {
+  box-sizing: border-box;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.home__search {
+  box-sizing: border-box;
+  width: 100%;
+  padding: 10px 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: var(--panel);
+  color: var(--text);
+  font: inherit;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.home__tabs {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.home__tab,
+.home__chip {
+  padding: 8px 16px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel);
+  color: var(--sub);
+  cursor: pointer;
+}
+
+.home__tab.is-selected,
+.home__chip.is-selected {
+  border-color: var(--accent);
+  background: var(--accent);
+  color: var(--on-accent);
+  font-weight: 700;
+}
+
+.home__chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.home__empty {
+  color: var(--sub);
+}
+
+.home__list {
+  list-style: none;
+  margin: 12px 0 0;
+  padding: 0;
+}
+
+.home__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border-bottom: 1px solid var(--line);
+}
+
+.home__song {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 12px 4px;
+  border: none;
+  background: none;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.home__song-title {
+  font-size: 16px;
+}
+
+.home__song-sub {
+  font-size: 13px;
+  color: var(--sub);
+}
+
+.home__preview {
+  flex: none;
+  width: 40px;
+  height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 50%;
+  background: var(--panel-2);
+  color: var(--accent-ink);
+  cursor: pointer;
+}
+
+.home__shelf-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+}
+
+.home__shelf-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--sub);
+}
+
+.home__shelf-all {
+  border: none;
+  background: none;
+  color: var(--accent-ink);
+  cursor: pointer;
+}
+
+.home__shelf {
+  display: flex;
+  gap: 8px;
+  margin: 8px 0 0;
+  padding: 0 0 4px;
+  list-style: none;
+  overflow-x: auto;
+}
+
+.home__shelf-card {
+  flex: none;
+  width: 130px;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--panel);
+  color: var(--text);
+  text-align: left;
+  font-size: 14px;
+  cursor: pointer;
+}

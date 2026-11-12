@@ -1,0 +1,103 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 640" font-family="sans-serif">
+  <rect width="100%" height="100%" fill="#FFFFFF"/>
+  <text x="24" y="36" font-size="18" font-weight="bold" fill="#202124">演奏画面（Android 横・25 鍵）</text>
+
+  <!-- device frame -->
+  <rect x="24" y="56" width="704" height="352" rx="28" fill="#F1F3F4" stroke="#80868B" stroke-width="2"/>
+  <rect x="40" y="72" width="672" height="320" fill="#212427"/>
+
+  <!-- top bar -->
+  <text x="56" y="100" font-size="14" fill="#c8dd3c">‹ 曲一覧</text>
+  <text x="136" y="100" font-size="14" font-weight="bold" fill="#f3f5f5">カノン</text>
+  <rect x="304" y="82" width="88" height="26" rx="13" fill="#3a3e41"/>
+  <text x="348" y="100" font-size="12" fill="#f3f5f5" text-anchor="middle">↺ 最初から</text>
+  <rect x="400" y="82" width="64" height="26" rx="13" fill="#3a3e41"/>
+  <text x="432" y="100" font-size="12" fill="#f3f5f5" text-anchor="middle">右手 ▾</text>
+  <rect x="472" y="82" width="64" height="26" rx="13" fill="#3a3e41"/>
+  <text x="504" y="100" font-size="12" fill="#f3f5f5" text-anchor="middle">25 鍵 ▾</text>
+  <rect x="560" y="82" width="64" height="26" rx="13" fill="#3a3e41"/>
+  <circle cx="576" cy="95" r="5" fill="#4cc46a"/>
+  <text x="588" y="100" font-size="12" fill="#f3f5f5">USB</text>
+  <circle cx="680" cy="95" r="9" fill="none" stroke="#9a9d9f" stroke-width="3" stroke-dasharray="4 2.3"/>
+  <circle cx="680" cy="95" r="3.5" fill="#9a9d9f"/>
+
+  <!-- progress -->
+  <rect x="56" y="120" width="560" height="4" rx="2" fill="#4a4d51"/>
+  <rect x="56" y="120" width="168" height="4" rx="2" fill="#c8dd3c"/>
+  <text x="696" y="126" font-size="11" fill="#9a9d9f" text-anchor="end">40 / 128</text>
+
+  <!-- roll -->
+  <rect x="56" y="136" width="640" height="112" rx="8" fill="#282c2f"/>
+  <line x1="56" y1="236" x2="696" y2="236" stroke="#c8dd3c" stroke-width="3"/>
+  <rect x="190" y="218" width="20" height="18" rx="4" fill="#c8dd3c"/>
+  <rect x="318" y="218" width="20" height="18" rx="4" fill="#3fa9e0"/>
+  <rect x="404" y="218" width="20" height="18" rx="4" fill="#c8dd3c"/>
+  <rect x="446" y="184" width="20" height="22" rx="4" fill="#3a3e41" stroke="#4a4d51"/>
+  <rect x="362" y="152" width="20" height="22" rx="4" fill="#3a3e41" stroke="#4a4d51"/>
+
+  <!-- keyboard -->
+  <rect x="48" y="256" width="656" height="128" rx="6" fill="#1a1c1f"/>
+  <g fill="#f3f5f5">
+    <rect x="52" y="260" width="40" height="120" rx="4"/>
+    <rect x="95" y="260" width="40" height="120" rx="4"/>
+    <rect x="138" y="260" width="40" height="120" rx="4"/>
+    <rect x="181" y="260" width="40" height="120" rx="4" fill="#c8dd3c"/>
+    <rect x="224" y="260" width="40" height="120" rx="4"/>
+    <rect x="267" y="260" width="40" height="120" rx="4"/>
+    <rect x="310" y="260" width="40" height="120" rx="4"/>
+    <rect x="353" y="260" width="40" height="120" rx="4"/>
+    <rect x="396" y="260" width="40" height="120" rx="4" fill="#c8dd3c"/>
+    <rect x="439" y="260" width="40" height="120" rx="4" fill="#afb1b2"/>
+    <rect x="482" y="260" width="40" height="120" rx="4"/>
+    <rect x="525" y="260" width="40" height="120" rx="4"/>
+    <rect x="568" y="260" width="40" height="120" rx="4"/>
+    <rect x="611" y="260" width="40" height="120" rx="4"/>
+    <rect x="654" y="260" width="40" height="120" rx="4"/>
+  </g>
+  <g fill="#1f2225">
+    <rect x="80" y="260" width="26" height="72" rx="3"/>
+    <rect x="123" y="260" width="26" height="72" rx="3"/>
+    <rect x="209" y="260" width="26" height="72" rx="3"/>
+    <rect x="252" y="260" width="26" height="72" rx="3"/>
+    <rect x="295" y="260" width="26" height="72" rx="3" fill="#1f8fd6"/>
+    <rect x="381" y="260" width="26" height="72" rx="3"/>
+    <rect x="424" y="260" width="26" height="72" rx="3"/>
+    <rect x="510" y="260" width="26" height="72" rx="3"/>
+    <rect x="553" y="260" width="26" height="72" rx="3"/>
+    <rect x="596" y="260" width="26" height="72" rx="3"/>
+  </g>
+  <line x1="353" y1="252" x2="353" y2="384" stroke="#9a9d9f" stroke-width="1" stroke-dasharray="4 3"/>
+
+  <!-- callouts -->
+  <g font-size="12" fill="#5F6368">
+    <line x1="744" y1="96" x2="700" y2="96" stroke="#80868B"/>
+    <text x="752" y="92" fill="#202124">① 上の帯 1 行</text>
+    <text x="752" y="110">戻る・曲名・最初から・手・</text>
+    <text x="752" y="126">鍵盤数・MIDI バッジ・設定</text>
+    <text x="752" y="142">（音色・音量つまみは無し）</text>
+    <line x1="744" y1="190" x2="700" y2="190" stroke="#80868B"/>
+    <text x="752" y="186" fill="#202124">② ロール</text>
+    <text x="752" y="204">白鍵＝ライム・黒鍵＝青</text>
+    <text x="752" y="220">判定線で弾くまで待つ</text>
+    <line x1="744" y1="320" x2="708" y2="320" stroke="#80868B"/>
+    <text x="752" y="300" fill="#202124">③ 鍵盤（画面でも弾ける）</text>
+    <text x="752" y="318">ライム＝次に押す</text>
+    <text x="752" y="366">グレー＝押している鍵</text>
+    <text x="752" y="334">破線＝C4 で左手・右手を分ける</text>
+    <text x="752" y="350">MIDI 機器は Web MIDI だけ</text>
+  </g>
+
+  <!-- start gate state -->
+  <text x="24" y="448" font-size="14" font-weight="bold" fill="#202124">最初に 1 回だけ出す幕（ブラウザの決まりで、音はタップのあとにしか出せない）</text>
+  <rect x="24" y="464" width="320" height="152" rx="16" fill="#F1F3F4" stroke="#80868B" stroke-width="2"/>
+  <rect x="36" y="476" width="296" height="128" fill="#212427"/>
+  <text x="184" y="520" font-size="16" font-weight="bold" fill="#f3f5f5" text-anchor="middle">KeysJam</text>
+  <rect x="120" y="540" width="128" height="36" rx="18" fill="#c8dd3c"/>
+  <text x="184" y="563" font-size="13" fill="#111315" text-anchor="middle">タップして始める</text>
+  <g font-size="12" fill="#5F6368">
+    <text x="368" y="500">・タップで AudioContext を起こし、ピアノの音源と Web MIDI の許可を取る</text>
+    <text x="368" y="524">・裏に回ったら（visibilitychange）音を止めて一時停止。戻ったら続ける</text>
+    <text x="368" y="548">・演奏中は Screen Wake Lock で画面を消さない</text>
+    <text x="368" y="572">・縦でも使える。部品は同じで、上から 帯 → ロール → 鍵盤 に積む</text>
+  </g>
+</svg>

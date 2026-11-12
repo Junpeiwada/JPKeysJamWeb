@@ -1,0 +1,112 @@
+/* 鍵盤。色は styles.css の変数だけを使う（手本: JPKeyboardUI の KeyboardView） */
+.kb-root {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: var(--well);
+  /* 複数の指で弾くので、ブラウザのスクロール・ズームに取られない */
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  overflow: hidden;
+}
+
+.kb-key {
+  position: absolute;
+  top: 0;
+  /* 鍵どうしの隙間（溝の色が見える） */
+  box-sizing: border-box;
+  padding: 0 0.75px;
+  pointer-events: none;
+}
+
+.kb-white {
+  height: 100%;
+}
+
+/* 黒鍵の高さは鍵盤の 62%（rollLayout の BLACK_HEIGHT_RATIO） */
+.kb-black {
+  height: 62%;
+  z-index: 1;
+}
+
+.kb-face {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  box-sizing: border-box;
+  border-radius: 0 0 6px 6px;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+}
+
+/* 白鍵: 面の下に側面の帯（手前の縁）が見える */
+.kb-white .kb-face {
+  background: var(--white-top);
+  border-bottom: 6px solid var(--white-side);
+}
+
+/* 黒鍵: 白鍵に影を落とす */
+.kb-black .kb-face {
+  background: var(--gray-top);
+  border-bottom: 8px solid var(--gray-side);
+  box-shadow: 0 2px 3px color-mix(in srgb, var(--scrim) 60%, transparent);
+}
+
+/* 押している鍵: 淡いグレーで押し下げる（白鍵は奥と左に影、黒鍵は影なし） */
+.kb-white.key-pressed .kb-face {
+  background: var(--pressed-top);
+  border-bottom-width: 2px;
+  box-shadow:
+    inset 0 8px 10px -6px color-mix(in srgb, var(--scrim) 55%, transparent),
+    inset 8px 0 8px -6px color-mix(in srgb, var(--scrim) 45%, transparent);
+}
+
+.kb-black.key-pressed .kb-face {
+  background: var(--pressed-black-top);
+  border-bottom-width: 3px;
+  box-shadow: none;
+}
+
+/* 次に押す鍵: 白鍵はライム、黒鍵は青 */
+.kb-white.key-guide .kb-face {
+  background: var(--accent);
+  border-bottom-color: var(--accent-deep);
+}
+
+.kb-black.key-guide .kb-face {
+  background: var(--black-guide-top);
+  border-bottom-color: var(--black-guide-side);
+  box-shadow:
+    inset 0 -2px 0 var(--black-guide-side-top),
+    0 2px 3px color-mix(in srgb, var(--scrim) 60%, transparent);
+}
+
+.kb-label {
+  margin-bottom: 8px;
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  color: var(--key-label);
+  pointer-events: none;
+}
+
+/* 明るい面（押している鍵・次に押す鍵）の上の音名 */
+.key-pressed .kb-label,
+.key-guide .kb-label {
+  color: var(--on-accent);
+}
+
+/* 両手の境目（C4 の左）の破線 */
+.kb-split {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  z-index: 2;
+  width: 0;
+  border-left: 2px dashed var(--sub);
+  transform: translateX(-1px);
+  pointer-events: none;
+}
